@@ -6,12 +6,23 @@ import pickle
 import os
 from openai import OpenAI
 
-# Initialize OpenAI client with a GROQ API endpoint
-secretName = os.environ['GROQ_API_KEY']
+# Try using groq_api_key if it exists
+if 'GROQ_API_KEY' in os.environ:
+    api_key = os.environ['GROQ_API_KEY']
+else:
+    # Fallback to secretName if groq_api_key is not found
+    api_key = st.secrets["GROQ_API_KEY"]  
+
+
+# # Initialize OpenAI client with a GROQ API endpoint
+# secretName = os.environ['GROQ_API_KEY']
+
+# #Using Streamlit
+# groq_api_key = st.secrets["GROQ_API_KEY"]
 
 client = OpenAI(
   base_url="https://api.groq.com/openai/v1",
-  api_key=secretName
+  api_key=api_key
 )
 
 def load_model(filename):
@@ -63,7 +74,11 @@ def make_predictions(input_df, input_dict):
   probabilities = {
     'XGBoost': xgboost_model.predict_proba(input_df)[0][1],
     'Random Forest': random_forest_model.predict_proba(input_df)[0][1],
-    'K-Nearest Neighbors': knn_model.predict_proba(input_df)[0][1],
+    'Support Vector Machine': svm_model.predict_proba(input_df)[0][1],
+    # 'K-Nearest Neighbors': knn_model.predict_proba(input_df)[0][1],
+    # 'Decision Tree': decision_tree_model.predict_proba(input_df)[0][1],
+    # 'Naive Bayes': naive_bayes_model.predict_proba(input_df)[0][1],
+
   }
 
   avg_probability = np.mean(list(probabilities.values()))
