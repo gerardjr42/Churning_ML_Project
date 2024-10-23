@@ -57,9 +57,9 @@ def make_predictions(input_df, input_dict):
         'XGBoost': xgboost_model.predict_proba(input_df)[0][1],
         'Random Forest': random_forest_model.predict_proba(input_df)[0][1],
         'Support Vector Machine': svm_model.predict_proba(input_df)[0][1],
-        'K Nearest Neighbors': knn_model.predict_proba(input_df)[0][1],
-        'Naive Bayes': naive_bayes_model.predict_proba(input_df)[0][1],
-        'Decision Tree': decision_tree_model.predict_proba(input_df)[0][1],
+        # 'K Nearest Neighbors': knn_model.predict_proba(input_df)[0][1],
+        # 'Naive Bayes': naive_bayes_model.predict_proba(input_df)[0][1],
+        # 'Decision Tree': decision_tree_model.predict_proba(input_df)[0][1],
     }
 
     avg_probability = np.mean(list(probabilities.values()))
