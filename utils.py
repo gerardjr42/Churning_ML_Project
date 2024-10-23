@@ -17,22 +17,21 @@ def create_gauge_chart(probability):
                   'x': [0,1],
                   'y': [0,1]
                 },
-                 title={
-                   'text': "Churn Probability",
-                   'font': {
-                      'size': 24,
-                      'color': 'white'
-                   }
-                 },
                  number={'font': {
-                   'size': 40,
+                   'size': 30,
                    'color': 'white'
-                 }},
+                 },
+                  'suffix': "%",
+                  'valueformat': ".1f"
+                },
                  gauge={
                    'axis': {
                      'range': [0, 100],
                      'tickwidth': 1,
-                     'tickcolor': 'white'
+                     'tickcolor': 'white',
+                     'tickmode': 'array',
+                     'tickvals': [0, 25, 50, 75, 100],  # Set tick values
+                     'ticktext': ['0', '25', '50', '75', '100']  # Set tick labels
                    },
                    'bar': {
                      'color': color
@@ -56,16 +55,16 @@ def create_gauge_chart(probability):
                        'width': 4
                      },
                      'thickness': 0.75,
-                     'value': 100
+                     'value': 100,
                    }
                  }))
+  
   #update chart layout
   fig.update_layout(paper_bgcolor="rgba(0,0,0,0)",
                     plot_bgcolor="rgba(0,0,0,0)",
                     font={'color': 'white'},
-                    width=400,
-                    height=300,
-                    margin=dict(l=20, r=20, t=50, b=20))
+                    height=300,  # Set a fixed height
+                    margin=dict(l=30, r=30, t=40, b=30))
   return fig
 
 def create_model_probability_chart(probabilities):
@@ -80,10 +79,48 @@ def create_model_probability_chart(probabilities):
            textposition='auto')
   ])
 
-  fig.update_layout(title="Churn Probability by Model",
-                    yaxis_title='Models',
-                    xaxis_title='Probability',
-                    xaxis=dict(tickformat='.0%', range=[0, 1]),
-                    height=400,
-                    margin=dict(l=20, r=20, t=40, b=20))
+  fig.update_layout(
+      yaxis_title='Models',
+      xaxis_title='Probability',
+      xaxis=dict(tickformat='.0%', range=[0, 1]),
+      height=300,  # Reduced height to match gauge chart
+      margin=dict(l=20, r=20, t=40, b=20),  # Adjusted margins
+      paper_bgcolor="rgba(0,0,0,0)",
+      plot_bgcolor="rgba(0,0,0,0)",
+      font={'color': 'white'}
+  )
+  
+  return fig
+
+def create_percentile_chart(percentiles):
+  x_values = [
+      percentiles['NumOfProducts'],
+      percentiles['Balance'],
+      percentiles['EstimatedSalary'],
+      percentiles['Tenure'],
+      percentiles['CreditScore']
+  ]
+
+  fig = go.Figure(data=[
+      go.Bar(
+          y=['NumOfProducts', 'Balance', 'EstimatedSalary', 'Tenure', 'CreditScore'],
+          x=x_values,
+          orientation='h',
+          textposition='auto'
+      )
+    ])
+
+  fig.update_layout(
+      title="Customer Percentiles",
+      yaxis_title='Metric',
+      xaxis_title='Percentile',
+      xaxis=dict(
+          tickvals=[0, 20, 40, 60, 80, 100], 
+          ticktext=['0%', '20%', '40%', '60%', '80%', '100%'],
+          range=[0, 100]
+      ),
+      height=400,
+      margin=dict(l=20, r=20, t=40, b=20)
+  )
+
   return fig
