@@ -14,20 +14,15 @@ else:
     api_key = st.secrets["GROQ_API_KEY"]  
 
 
-# # Initialize OpenAI client with a GROQ API endpoint
-# secretName = os.environ['GROQ_API_KEY']
-
-# #Using Streamlit
-# groq_api_key = st.secrets["GROQ_API_KEY"]
-
 client = OpenAI(
   base_url="https://api.groq.com/openai/v1",
   api_key=api_key
 )
 
+@st.cache_data
 def load_model(filename):
-  with open(filename, "rb") as file:
-    return pickle.load(file)
+    with open(filename, "rb") as file:
+        return pickle.load(file)
 
 # Load Models                       
 xgboost_model = load_model('xgb_model.pkl')
@@ -68,38 +63,68 @@ def prepare_input(credit_score, location, gender, age, tenure, balance, num_prod
   input_df = pd.DataFrame([input_dict])
   return input_df, input_dict
 
-
 def make_predictions(input_df, input_dict):
-
   probabilities = {
-    'XGBoost': xgboost_model.predict_proba(input_df)[0][1],
-    'Random Forest': random_forest_model.predict_proba(input_df)[0][1],
-    'Support Vector Machine': svm_model.predict_proba(input_df)[0][1],
-    # 'K-Nearest Neighbors': knn_model.predict_proba(input_df)[0][1],
-    # 'Decision Tree': decision_tree_model.predict_proba(input_df)[0][1],
-    # 'Naive Bayes': naive_bayes_model.predict_proba(input_df)[0][1],
-
+      'XGBoost': xgboost_model.predict_proba(input_df)[0][1],
+      'Random Forest': random_forest_model.predict_proba(input_df)[0][1],
+      'Support Vector Machine': svm_model.predict_proba(input_df)[0][1],
+      # 'Voting Classifier': voting_classifier_model.predict_proba(input_df)[0][1],
+      # 'K Nearest Neighbors': knn_model.predict_proba(input_df)[0][1],
+      # 'Naive Bayes': naive_bayes_model.predict_proba(input_df)[0][1],
+      # 'Decision Tree': decision_tree_model.predict_proba(input_df)[0][1],
   }
 
   avg_probability = np.mean(list(probabilities.values()))
 
-  col1, col2 = st.columns(2)
+  # Add some vertical space
+  st.markdown("<div style='margin-top: 60px;'></div>", unsafe_allow_html=True)
+
+  # Create a 2-column layout with added spacing
+  col1, spacer, col2 = st.columns([1, 0.1, 1])
+
+  # Create a 2-column layout
+  # col1, col2 = st.columns(2)
 
   with col1:
-    fig = ut.create_gauge_chart(avg_probability)
-    st.plotly_chart(fig, use_container_width=True)
-    st.write(f"The customer has a {avg_probability:.2%} probability of churning.")
+      st.markdown("<h4 style='text-align: center;'>Churn Probability</h4>", unsafe_allow_html=True)
+      fig = ut.create_gauge_chart(avg_probability)
+      # st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
   with col2:
-    fig_probs = ut.create_model_probability_chart(probabilities)
-    st.plotly_chart(fig_probs, use_container_width=True)
+      st.markdown("<h4 style='text-align: center;'>Churn Probability by Model</h4>", unsafe_allow_html=True)
+      fig_probs = ut.create_model_probability_chart(probabilities)
+      st.plotly_chart(fig_probs, use_container_width=True, config={'displayModeBar': False})
+
+  st.markdown(f"<p style='text-align: center;'>The customer has a {avg_probability:.2%} probability of churning.</p>", unsafe_allow_html=True)
+
+  # Add some vertical space
+  st.markdown("<div style='margin-top: 40px;'></div>", unsafe_allow_html=True)
 
   return avg_probability
-  
-  # st.markdown("### Model Probabilities")
-  # for model, prob in probabilities.items():
-  #   st.write(f"{model} {prob}")
-  # st.write(f"Average Probability: {avg_probability}")
+
+
+def generate_percentiles(df, input_dict):
+  all_num_products = df['NumOfProducts'].sort_values().tolist()
+  all_balances = df['Balance'].sort_values().tolist()
+  all_estimated_salaries = df['EstimatedSalary'].sort_values().tolist()
+  all_tenures = df['Tenure'].sort_values().tolist()
+  all_credit_scores = df['CreditScore'].sort_values().tolist()
+  product_rank = np.searchsorted(all_num_products, input_dict['NumOfProducts'], side='right')
+  balance_rank = np.searchsorted(all_balances, input_dict['Balance'], side='right')
+  salary_rank = np.searchsorted(all_estimated_salaries, input_dict['EstimatedSalary'], side='right')
+  tenure_rank = np.searchsorted(all_tenures, input_dict['Tenure'], side='right')
+  credit_rank = np.searchsorted(all_credit_scores, input_dict['CreditScore'], side='right')
+
+  N = 10000
+
+  percentiles = {
+    'CreditScore': int(np.floor((credit_rank / N) * 100)),
+    'Tenure': int(np.floor((tenure_rank / N) * 100)),
+    'EstimatedSalary': int(np.floor((salary_rank / N) * 100)),
+    'Balance': int(np.floor((balance_rank / N) * 100)),
+    'NumOfProducts': int(np.floor((product_rank / N) * 100)),
+  }
+  return percentiles
 
 def explain_prediction(probability, input_dict, surname):
   prompt = f"""You are an expert data scientist at a bank, where you specialize in interpreting and explaining predictions of machine learning models.
@@ -113,18 +138,18 @@ def explain_prediction(probability, input_dict, surname):
 
               Feature  | Importance
   -----------------------------------
-        NumOfProducts  |	0.30
-       IsActiveMember  |	0.18
-                  Age  |    0.11
-    Geography_Germany  |	0.11
-   	          Balance  | 	0.05
-   	           Gender  | 	0.04
-   	 Geography_France  | 	0.04
-   	  Geography_Spain  | 	0.04
-   	        HasCrCard  | 	0.04
-       	  CreditScore  |	0.03
-      EstimatedSalary  | 	0.03
-               Tenure  | 	0.03
+        NumOfProducts  |	0.23
+                  Age  |	0.22
+       IsActiveMember  |  0.13
+    Geography_Germany  |	0.12
+              Balance  | 	0.08
+               Gender  | 	0.08
+     Geography_France  | 	0.06
+            HasCrCard  | 	0.02
+          CreditScore  |	0.02
+      EstimatedSalary  | 	0.02
+               Tenure  | 	0.02
+      Geography_Spain  | 	0.00
 
   {pd.set_option('display.max_columns', None)}
 
@@ -174,7 +199,7 @@ def generate_email(probability, input_dict, explanation, surname):
 
   print("\n\nEMAIL PROMPT", prompt)
   return raw_response.choices[0].message.content
-  
+
 
 st.title("Customer Churn Prediction")
 
@@ -200,7 +225,7 @@ if selected_customer_option:
   #Get Customer Info in 2 columns
   col1, col2 = st.columns(2)
   with col1:
-    
+
     credit_score = st.number_input(
       "Credit Score",
       min_value=300,
@@ -257,20 +282,19 @@ if selected_customer_option:
 
   avg_probability = make_predictions(input_df, input_dict)
 
+  percentiles = generate_percentiles(df, input_dict)  # Call the function to get percentiles
+  fig = ut.create_percentile_chart(percentiles)       # Create the chart
+  st.plotly_chart(fig, use_container_width=True)       # Display the chart
+
   explanation = explain_prediction(avg_probability, input_dict, selected_customer['Surname'])
 
   st.markdown("---")
   st.header("Explanation of Prediction")
   st.markdown(explanation)
 
-  
+
   email = generate_email(avg_probability, input_dict, explanation, selected_customer['Surname'])
-  
+
   st.markdown("---")
   st.subheader("Personalized Email")
   st.markdown(email)
-  
-    
-
-
-  
