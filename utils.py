@@ -58,7 +58,7 @@ def create_gauge_chart(probability):
                      'value': 100,
                    }
                  }))
-  
+
   #update chart layout
   fig.update_layout(paper_bgcolor="rgba(0,0,0,0)",
                     plot_bgcolor="rgba(0,0,0,0)",
@@ -89,7 +89,7 @@ def create_model_probability_chart(probabilities):
       plot_bgcolor="rgba(0,0,0,0)",
       font={'color': 'white'}
   )
-  
+
   return fig
 
 def create_percentile_chart(percentiles):
@@ -115,7 +115,7 @@ def create_percentile_chart(percentiles):
       yaxis_title='Metric',
       xaxis_title='Percentile',
       xaxis=dict(
-          tickvals=[0, 20, 40, 60, 80, 100], 
+          tickvals=[0, 20, 40, 60, 80, 100],
           ticktext=['0%', '20%', '40%', '60%', '80%', '100%'],
           range=[0, 100]
       ),
