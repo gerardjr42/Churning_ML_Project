@@ -110,44 +110,36 @@ def generate_percentiles(df, input_dict):
     }
     return percentiles
 
-def explain_prediction(probability, input_dict, surname):
-    prompt = f"""You are an expert data scientist at a bank, where you specialize in interpreting and explaining predictions of machine learning models.
+def explain_prediction(probability, input_dict, surname, df):
+    prompt = f"""You are an expert data scientist at a bank, specializing in interpreting and explaining machine learning model predictions.
 
-    Your machine learning model has predicted that a customer named {surname} has a {round(probability * 100, 1)}% probability of churning, based on the information provided below.
+The model predicts that customer {surname} has a {round(probability * 100, 1)}% probability of churning. Below is the customer's information and the model's top 10 features influencing this prediction:
 
-    Here is the customer's information:
-    {input_dict}
+Customer Information:
+{input_dict}
 
-    Here are the machine learning model's top 10 most important features for predicting churn:
+Feature Importance:
+1. NumOfProducts: 0.23
+2. Age: 0.22
+3. IsActiveMember: 0.13
+4. Geography_Germany: 0.12
+5. Balance: 0.08
+6. Gender: 0.08
+7. Geography_France: 0.06
+8. HasCrCard: 0.02
+9. CreditScore: 0.02
+10. EstimatedSalary: 0.02
 
-                Feature  | Importance
-    -----------------------------------
-          NumOfProducts  |	0.23
-                    Age  |	0.22
-         IsActiveMember  |  0.13
-      Geography_Germany  |	0.12
-                Balance  | 	0.08
-                 Gender  | 	0.08
-       Geography_France  | 	0.06
-              HasCrCard  | 	0.02
-            CreditScore  |	0.02
-        EstimatedSalary  | 	0.02
-                 Tenure  | 	0.02
-        Geography_Spain  | 	0.00
+Summary Statistics:
+- Churned Customers: {df[df['Exited'] == 1].describe()}
+- Non-Churned Customers: {df[df['Exited'] == 0].describe()}
 
-    {pd.set_option('display.max_columns', None)}
+Please provide a concise, three-sentence explanation based on the following:
+- If the churn probability is over 40%, explain why the customer is at risk.
+- If the churn probability is under 40%, explain why the customer is not at risk.
+- Use the feature importance and summary statistics to support your explanation.
+"""
 
-    Here are summary statistics for churned customers:
-    {df[df['Exited'] == 1].describe()}
-
-    Here are summary statistics for non-churned customers:
-    {df[df['Exited'] == 0].describe()}
-
-    - If the customer has over a 40% risk of churning, generate a 3 sentence explanation of why they are at risk of churning. Do not include 
-    - Else, if the customer has less than a 40% risk of churning, generate a 3 sentence explanation of why they are not at risk of churning.
-    - Your explanation should be based on your analysis, the summary statistics of churned and non-churned customers, and the feature importance provided.
-    - Remember to keep the response in three sentences.
-    """
     print("EXPLANATION PROMPT", prompt)
 
     raw_response = client.chat.completions.create(
