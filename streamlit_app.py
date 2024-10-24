@@ -143,6 +143,7 @@ Please provide a concise, three-sentence explanation based on the following:
 - If the churn probability is under 40%, explain why the customer is not at risk.
 - Use the feature importance and summary statistics to support your explanation.
 - Provide only one explanation based on the customer's churn probability.
+- Do not mention the machine learning model or the percentages of feature importance.
 """
 
     print("EXPLANATION PROMPT", prompt)
