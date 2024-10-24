@@ -1,10 +1,12 @@
-import streamlit as st
-import utils as ut
-import pandas as pd
-import numpy as np
-import pickle
 import os
+import pickle
+
+import numpy as np
+import pandas as pd
+import streamlit as st
 from openai import OpenAI
+
+import utils as ut
 
 # Try using groq_api_key if it exists
 if 'GROQ_API_KEY' in os.environ:
@@ -110,7 +112,7 @@ def generate_percentiles(df, input_dict):
     }
     return percentiles
 
-def explain_prediction(probability, input_dict, surname, df):
+def explain_prediction(probability, input_dict, surname):
     prompt = f"""You are an expert data scientist at a bank, specializing in interpreting and explaining machine learning model predictions.
 
 The model predicts that customer {surname} has a {round(probability * 100, 1)}% probability of churning. Below is the customer's information and the model's top 10 features influencing this prediction:
@@ -129,6 +131,8 @@ Feature Importance:
 8. HasCrCard: 0.02
 9. CreditScore: 0.02
 10. EstimatedSalary: 0.02
+
+{pd.set_option('display.max_columns', None)}
 
 Summary Statistics:
 - Churned Customers: {df[df['Exited'] == 1].describe()}
