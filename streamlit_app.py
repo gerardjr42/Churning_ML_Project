@@ -143,9 +143,10 @@ def explain_prediction(probability, input_dict, surname):
     Here are summary statistics for non-churned customers:
     {df[df['Exited'] == 0].describe()}
 
-    - If the customer has over a 40% risk of churning, generate a 3 sentence explanation of why they are at risk of churning.
-    - Else, if the customer has less than a 40% risk of churning, generate a 3 sentence explanation of why they might not be at risk of churning.
+    - If the customer has over a 40% risk of churning, generate a 3 sentence explanation of why they are at risk of churning. Do not include 
+    - Else, if the customer has less than a 40% risk of churning, generate a 3 sentence explanation of why they are not at risk of churning.
     - Your explanation should be based on your analysis, the summary statistics of churned and non-churned customers, and the feature importance provided.
+    - Remember to keep the response in three sentences.
     """
     print("EXPLANATION PROMPT", prompt)
 
