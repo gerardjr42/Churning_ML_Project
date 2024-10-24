@@ -142,6 +142,7 @@ Please provide a concise, three-sentence explanation based on the following:
 - If the churn probability is over 40%, explain why the customer is at risk.
 - If the churn probability is under 40%, explain why the customer is not at risk.
 - Use the feature importance and summary statistics to support your explanation.
+- Provide only one explanation based on the customer's churn probability.
 """
 
     print("EXPLANATION PROMPT", prompt)
