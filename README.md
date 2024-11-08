@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Streamlit application predicts customer churn for a bank using various machine learning models. It provides an interactive interface for selecting customers, viewing their details, and getting predictions on their likelihood to churn. The app also generates explanations for the predictions and personalized emails for customer retention.
+This Streamlit application predicts customer churn for a bank using various machine learning models. It provides an interactive interface for selecting customers, viewing their details, and getting predictions on their likelihood to churn. The app also generates explanations for the predictions and personalized emails for customer retention. Here is my Google Colab code with annotations: https://colab.research.google.com/drive/1fFhchgnKv8xuHAJB6KpFj4e0VnbNnmA1?usp=sharing
 
 ## Features
 
